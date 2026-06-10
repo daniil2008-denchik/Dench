@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прыгающий человечек</title>
+    <style>
+        body {
+            background: black;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .fixed-panel {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 1000;
+            text-align: center;
+        }
+        
+        .fixed-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            background: #0f0;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        button:hover {
+            background: #0a0;
+        }
+        
+        .animation-area {
+            margin-top: 100px;
+            margin-bottom: 100px;
+            min-height: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        pre {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            margin: 0;
+            line-height: 1.3;
+            color: #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="fixed-panel">
+        <span>ПОЗИЦИЯ: <span id="position">0</span> | </span>
+        <span>ПРЫЖКОВ: <span id="counter">0</span> | </span>
+        <span>СТАТУС: <span id="status">ВВЕРХ</span></span>
+    </div>
+    
+    <div class="animation-area">
+        <pre id="ball"></pre>
+    </div>
+    
+    <div class="fixed-controls">
+        <button id="pauseBtn">ПАУЗА</button>
+        <button id="resetBtn">СБРОС</button>
+    </div>
+
+<script>
+    // ПРОСТЫЕ ПЕРЕМЕННЫЕ
+    let pos = 0;           // позиция (0 = низ, 10 = верх)
+    let dir = 1;           // направление (1 = вверх, -1 = вниз)
+    let paused = false;    // пауза
+    let counter = 0;       // счётчик прыжков
+    
+    const MAX = 10;        // максимальная высота
+    
+    let timer = null;      // таймер
+    
+    // РИСОВАНИЕ ЧЕЛОВЕЧКА
+    function draw() {
+        let output = "";
+        
+        // Пустые строки (позиция)
+        for (let i = 0; i < pos; i++) {
+            output += "\n";
+        }
+        
+        // Человечек
+        output += "   O\n";
+        output += "  /|\\\n";
+        output += "  / \\\n";
+        
+        // Пол внизу
+        if (pos <= 1) {
+            output += "\n   ===\n";
+        }
+        
+        document.getElementById('ball').textContent = output;
+    }
+    
+    // ФИЗИКА (ОДНО ДВИЖЕНИЕ В КАДР)
+    function update() {
+        if (paused) return;
+        
+        // ДВИГАЕМСЯ ВСЕГДА НА 1 (ПОСТОЯННАЯ СКОРОСТЬ)
+        pos = pos + dir;
+        
+        // ПРОВЕРКА ГРАНИЦ
+        if (pos >= MAX) {
+            pos = MAX;
+            dir = -1;  // летим вниз
+        }
+        else if (pos <= 0) {
+            pos = 0;
+            dir = 1;   // летим вверх
+            counter++; // увеличиваем счётчик прыжков
+        }
+        
+        // Обновляем информацию на экране
+        document.getElementById('position').textContent = pos;
+        document.getElementById('counter').textContent = counter;
+        document.getElementById('status').textContent = (dir === 1) ? "ВВЕРХ" : "ВНИЗ";
+        
+        // Рисуем
+        draw();
+    }
+    
+    // УПРАВЛЕНИЕ
+    function togglePause() {
+        paused = !paused;
+        document.getElementById('pauseBtn').textContent = paused ? "СТАРТ" : "ПАУЗА";
+    }
+    
+    function reset() {
+        paused = false;
+        pos = 0;
+        dir = 1;
+        counter = 0;
+        document.getElementById('pauseBtn').textContent = "ПАУЗА";
+        update();
+    }
+    
+    // ЗАПУСК АНИМАЦИИ (50 мс = ПОСТОЯННАЯ СКОРОСТЬ)
+    setInterval(() => {
+        update();
+    }, 50);
+    
+    // КНОПКИ
+    document.getElementById('pauseBtn').onclick = togglePause;
+    document.getElementById('resetBtn').onclick = reset;
+    
+    // ПЕРВЫЙ РИСУНОК
+    draw();
+</script>
+</body>
+</html>
